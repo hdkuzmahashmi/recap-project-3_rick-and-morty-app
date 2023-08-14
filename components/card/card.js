@@ -1,8 +1,7 @@
-export function createCharacterCard(url, status, type, occurrences) {
-  //const card = document.querySelector("[data-js=card-container]");
-
-  const li = document.createElement("li");
-  li.innerHTML = ` 
+export default function createCharacterCard(url, status, type, occurrences) {
+  const liElement = document.createElement("li");
+  liElement.classList.add("card");
+  liElement.innerHTML = ` 
     <div class="card__image-container">
       <img
         class="card__image"
@@ -23,5 +22,5 @@ export function createCharacterCard(url, status, type, occurrences) {
       </dl>
     </div>`;
 
-  return li;
+  return liElement;
 }
