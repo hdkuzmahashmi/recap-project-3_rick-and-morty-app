@@ -1,4 +1,3 @@
-console.clear();
 import createCharacterCard from "./components/card/card.js";
 
 const cardContainer = document.querySelector('[data-js="card-container"]');
@@ -12,35 +11,58 @@ const nextButton = document.querySelector('[data-js="button-next"]');
 const pagination = document.querySelector('[data-js="pagination"]');
 
 // States
-const maxPage = 42;
+let maxPage = 0;
 let page = 1;
 const searchQuery = "";
 
 fetchCharacters("character", page);
 
-// Pagination
-
-nextButton.addEventListener("click", async () => {
+// Pagination - final solution
+nextButton.addEventListener("click", () => {
   page++;
-  if (page === 43) {
-    pagination.textContent = `1 / ${maxPage}`;
-  } else pagination.textContent = `${page} / ${maxPage}`;
-  if (page > 42) {
-    page = 1;
+  prevButton.removeAttribute("disabled");
+  if (page > maxPage) {
+    page = maxPage;
+    nextButton.setAttribute("disabled", "disabled");
+  } else {
+    nextButton.removeAttribute("disabled");
+    fetchCharacters("character", page);
   }
-  const data = await fetchCharacters("character", page);
+  pagination.textContent = `${page} / ${maxPage}`;
 });
 
-prevButton.addEventListener("click", async () => {
+prevButton.addEventListener("click", () => {
   page--;
-  if (page === 0) {
-    pagination.textContent = `${maxPage} / ${maxPage}`;
-  } else pagination.textContent = `${page} / ${maxPage}`;
-  if (page < 1) {
-    page = 42;
+  prevButton.removeAttribute("disabled");
+  nextButton.removeAttribute("disabled");
+  pagination.textContent = `${page} / ${maxPage}`;
+  if (page === 1) {
+    prevButton.setAttribute("disabled", "disabled");
+  } else {
+    pagination.textContent = `${page} / ${maxPage}`;
+    fetchCharacters("character", page);
   }
-  const data = await fetchCharacters("character", page);
 });
+
+// -- Pagination Way with infinite Loop --
+// nextButton.addEventListener("click", () => {
+//   page++;
+//   if (page > maxPage) {
+//     page = 1;
+//   }
+//   pagination.textContent = `${page} / ${maxPage}`;
+//   fetchCharacters("character", page);
+// });
+
+// prevButton.addEventListener("click", () => {
+//   page--;
+//   pagination.textContent = `${page} / ${maxPage}`;
+//   if (page < 1) {
+//     page = maxPage;
+//     pagination.textContent = `${maxPage} / ${maxPage}`;
+//   }
+//   fetchCharacters("character", page);
+// });
 
 // Fetching Data
 async function fetchCharacters(slug, page) {
@@ -48,10 +70,12 @@ async function fetchCharacters(slug, page) {
   const url = `https://rickandmortyapi.com/api/${slug}/?page=${page}`;
   const response = await fetch(url);
   const data = await response.json();
+  maxPage = data.info.pages;
 
   data.results.forEach((person) => {
     const card = createCharacterCard(
       person.image,
+      person.name,
       person.status,
       person.type,
       person.episode.length
