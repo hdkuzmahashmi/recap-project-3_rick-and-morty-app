@@ -13,42 +13,77 @@ const pagination = document.querySelector('[data-js="pagination"]');
 // States
 let maxPage = 0;
 let page = 1;
-const searchQuery = "";
+let searchQuery = "";
+let isSearch = false;
 
-fetchCharacters("character", page);
+fetchCharacters(`character?page=${page}`);
 
 // Pagination - final solution
+
 nextButton.addEventListener("click", () => {
+  let slug = "";
+
   if (page < maxPage) {
     page++;
-    fetchCharacters("character", page);
+    if (isSearch) {
+      slug = `character/?page=${page}${searchQuery}`;
+    } else {
+      slug = `character?page=${page}`;
+    }
+    fetchCharacters(slug);
   }
 });
 
 prevButton.addEventListener("click", () => {
+  let slug = "";
   if (page > 1) {
     page--;
-    fetchCharacters("character", page);
+    if (isSearch) {
+      slug = `character/?page=${page}${searchQuery}`;
+    } else {
+      slug = `character?page=${page}`;
+    }
+    fetchCharacters(slug);
   }
 });
 
-// Fetching Data
-async function fetchCharacters(slug, page) {
-  cardContainer.innerHTML = "";
-  const url = `https://rickandmortyapi.com/api/${slug}/?page=${page}`;
-  const response = await fetch(url);
-  const data = await response.json();
-  maxPage = data.info.pages;
-  pagination.textContent = `${page} / ${maxPage}`;
+// Search Button
+searchBar.addEventListener("submit", (event) => {
+  let slug = "";
+  isSearch = true;
+  event.preventDefault();
 
-  data.results.forEach((person) => {
-    const card = createCharacterCard(
-      person.image,
-      person.name,
-      person.status,
-      person.type,
-      person.episode.length
-    );
-    cardContainer.append(card);
-  });
+  searchQuery = `&name=${event.target.query.value}`;
+  slug = `character/?page=${page}&name=${event.target.query.value}`;
+  fetchCharacters(slug);
+});
+
+// Fetching Data
+async function fetchCharacters(slug) {
+  cardContainer.innerHTML = "";
+  try {
+    const url = `https://rickandmortyapi.com/api/${slug}`;
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (response.status !== 404) {
+      maxPage = data.info.pages;
+
+      pagination.textContent = `${page} / ${maxPage}`;
+
+      data.results.forEach((person) => {
+        const card = createCharacterCard(
+          person.image,
+          person.name,
+          person.status,
+          person.type,
+          person.episode.length
+        );
+        cardContainer.append(card);
+      });
+    } else pagination.textContent = "0 / 0";
+  } catch (error) {
+    console.error(error);
+  }
 }
