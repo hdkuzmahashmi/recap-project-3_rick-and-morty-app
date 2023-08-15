@@ -19,50 +19,18 @@ fetchCharacters("character", page);
 
 // Pagination - final solution
 nextButton.addEventListener("click", () => {
-  page++;
-  prevButton.removeAttribute("disabled");
-  if (page > maxPage) {
-    page = maxPage;
-    nextButton.setAttribute("disabled", "disabled");
-  } else {
-    nextButton.removeAttribute("disabled");
+  if (page < maxPage) {
+    page++;
     fetchCharacters("character", page);
   }
-  pagination.textContent = `${page} / ${maxPage}`;
 });
 
 prevButton.addEventListener("click", () => {
-  page--;
-  prevButton.removeAttribute("disabled");
-  nextButton.removeAttribute("disabled");
-  pagination.textContent = `${page} / ${maxPage}`;
-  if (page === 1) {
-    prevButton.setAttribute("disabled", "disabled");
-  } else {
-    pagination.textContent = `${page} / ${maxPage}`;
+  if (page > 1) {
+    page--;
     fetchCharacters("character", page);
   }
 });
-
-// -- Pagination Way with infinite Loop --
-// nextButton.addEventListener("click", () => {
-//   page++;
-//   if (page > maxPage) {
-//     page = 1;
-//   }
-//   pagination.textContent = `${page} / ${maxPage}`;
-//   fetchCharacters("character", page);
-// });
-
-// prevButton.addEventListener("click", () => {
-//   page--;
-//   pagination.textContent = `${page} / ${maxPage}`;
-//   if (page < 1) {
-//     page = maxPage;
-//     pagination.textContent = `${maxPage} / ${maxPage}`;
-//   }
-//   fetchCharacters("character", page);
-// });
 
 // Fetching Data
 async function fetchCharacters(slug, page) {
@@ -71,6 +39,7 @@ async function fetchCharacters(slug, page) {
   const response = await fetch(url);
   const data = await response.json();
   maxPage = data.info.pages;
+  pagination.textContent = `${page} / ${maxPage}`;
 
   data.results.forEach((person) => {
     const card = createCharacterCard(
