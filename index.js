@@ -1,20 +1,23 @@
 import createCharacterCard from "./components/card/card.js";
+import createButton from "./components/nav-button/nav-button.js";
+import createPagination from "./components/nav-pagination/nav-pagination.js";
 import createSearchBar from "./components/search-bar/search-bar.js";
 
 const cardContainer = document.querySelector('[data-js="card-container"]');
 const searchBarContainer = document.querySelector(
   '[data-js="search-bar-container"]'
 );
+const navigation = document.querySelector('[data-js="navigation"]');
 
 // Append things to DOM
 const searchBarElement = createSearchBar();
 searchBarContainer.append(searchBarElement);
-
-const searchBar = document.querySelector('[data-js="search-bar"]');
-const navigation = document.querySelector('[data-js="navigation"]');
-const prevButton = document.querySelector('[data-js="button-prev"]');
-const nextButton = document.querySelector('[data-js="button-next"]');
-const pagination = document.querySelector('[data-js="pagination"]');
+const buttonElementPrev = createButton("prev");
+navigation.append(buttonElementPrev);
+const paginationElement = createPagination();
+navigation.append(paginationElement);
+const buttonElementNext = createButton("next");
+navigation.append(buttonElementNext);
 
 // States
 let maxPage = 0;
@@ -25,7 +28,7 @@ let isSearch = false;
 fetchCharacters(`character?page=${page}`);
 
 // Pagination - final solution
-nextButton.addEventListener("click", () => {
+buttonElementNext.addEventListener("click", () => {
   let slug = "";
 
   if (page < maxPage) {
@@ -39,7 +42,7 @@ nextButton.addEventListener("click", () => {
   }
 });
 
-prevButton.addEventListener("click", () => {
+buttonElementPrev.addEventListener("click", () => {
   let slug = "";
   if (page > 1) {
     page--;
@@ -53,12 +56,10 @@ prevButton.addEventListener("click", () => {
 });
 
 // Search Button (ausgelagert)
-searchBar.addEventListener("submit", (event) => {
+searchBarElement.addEventListener("submit", (event) => {
   let slug = "";
   isSearch = true;
   event.preventDefault();
-  console.log("event", event);
-  console.log("event target elements", event.target.elements.searchInput.value);
   searchQuery = `&name=${event.target.elements.searchInput.value}`;
   slug = `character/?page=${page}${searchQuery}`;
   fetchCharacters(slug);
@@ -76,7 +77,7 @@ async function fetchCharacters(slug) {
     if (response.status !== 404) {
       maxPage = data.info.pages;
 
-      pagination.textContent = `${page} / ${maxPage}`;
+      paginationElement.textContent = `${page} / ${maxPage}`;
 
       data.results.forEach((person) => {
         const card = createCharacterCard(
@@ -88,7 +89,7 @@ async function fetchCharacters(slug) {
         );
         cardContainer.append(card);
       });
-    } else pagination.textContent = "0 / 0";
+    } else paginationElement.textContent = "0 / 0";
   } catch (error) {
     console.error(error);
   }
